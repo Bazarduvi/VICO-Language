@@ -109,52 +109,216 @@ button {
 .history-header { display: flex; justify-content: space-between; align-items: center; }
 #historyList { list-style: none; padding: 0; }
 #historyList li { background: var(--card-bg); padding: 10px; margin-bottom: 8px; border-radius: 5px; }
-</style>
+
+    /* --- Variables para Dark Mode --- */
+:root {
+    --bg-color: #f4f4f9;
+    --text-color: #333;
+    --card-bg: #fff;
+    --border-color: #ccc;
+    --nav-bg: #fff;
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --border-color: #444;
+    --nav-bg: #1e1e1e;
+}
+
+/* Transición suave para el modo oscuro */
+body { transition: background-color 0.3s, color 0.3s; }
+.output-section, .visual-map-section, .settings-card, header { transition: background-color 0.3s; }
+
+/* --- Navegación Inferior Estilo App --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--nav-bg);
+    display: flex;
+    justify-content: space-around;
+    padding: 10px 0;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    flex-direction: column;
+    font-size: 12px;
+    opacity: 0.6;
+}
+.nav-btn.active { opacity: 1; color: var(--primary); font-weight: bold; }
+
+/* Ajuste del Main para que el menú inferior no lo tape */
+main { padding-bottom: 70px; }
+
+/* --- Estilos del Perfil y Ajustes --- */
+.settings-card {
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 1px solid var(--border-color);
+}
+.highlight-card { border-left: 4px solid #34C759; }
+
+.settings-input {
+    width: 100%; padding: 10px; margin-bottom: 10px;
+    border: 1px solid var(--border-color); border-radius: 5px;
+    background: var(--bg-color); color: var(--text-color);
+    box-sizing: border-box;
+}
+
+.setting-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+}
+
+.btn-cafe { background: #FFCC00; color: #333; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 14px; }
+.icon-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+
+/* --- Estilos de las Notas y Carpetas --- */
+.folders-grid { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
+.folder-item { 
+    background: var(--primary); color: white; padding: 10px 15px; 
+    border-radius: 8px; cursor: pointer; white-space: nowrap; 
+}
+.folder-controls, .note-controls, .link-controls { display: flex; gap: 10px; margin-bottom: 15px; }
+.folder-controls input, .note-controls select, .link-controls input { flex: 1; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); }
+.note-item { background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; margin-bottom: 10px; }
+.links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.custom-link-btn { display: block; text-align: center; background: var(--bg-color); border: 1px solid var(--primary); color: var(--text-color); padding: 10px; border-radius: 8px; text-decoration: none; }
+    
+    </style>
 </head>
 <body>
     <header>
         <h1>🇪🇦VICO🇦🇺Lengua🇭🇰</h1>
-        <button id="adminBtn" class="btn-secondary">⚙️ Admin / JSON</button>
+        <div class="header-actions">
+            <button id="themeToggle" class="icon-btn">🌙</button>
+        </div>
     </header>
 
+    <nav class="bottom-nav">
+        <button onclick="switchTab('traductor')" class="nav-btn active">🔤 Traductor</button>
+        <button onclick="switchTab('notas')" class="nav-btn">📝 Notas</button>
+        <button onclick="switchTab('perfil')" class="nav-btn">⚙️ Perfil</button>
+    </nav>
+
     <main>
-        <section class="duvi-os-panel" style="background: #e5e5ea; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                <h3 style="margin: 0;">⚡ Modo IA & Créditos: <span id="creditCount">20</span></h3>
-                <a href="https://paypal.me/TU_LINK_PAYPAL" target="_blank" class="btn-secondary" style="text-decoration: none; display: inline-block; background: #FFCC00; color: #333;">☕ Invítame a un café</a>
+        <section id="tab-traductor" class="app-tab active-tab">
+            <div class="input-section">
+                <textarea id="userInput" placeholder="Escribe en español, inglés, o jyutping..."></textarea>
+                <div class="api-selector">
+                    <label><input type="radio" name="api" value="gemini" checked> Gemini</label>
+                    <label><input type="radio" name="api" value="groq"> Groq</label>
+                </div>
+                <button id="translateBtn" class="btn-primary">Traducir con IA</button>
+            </div>
+
+            <div class="visual-map-section" id="visualMapArea"></div>
+
+            <div class="output-section" id="outputArea">
+                <div class="lang-row"><strong>Cantonés:</strong> <span id="outCantonese"></span></div>
+                <div class="lang-row"><strong>Mandarín:</strong> <span id="outMandarin"></span></div>
+                <div class="lang-row"><strong>Inglés:</strong> <span id="outEnglish"></span></div>
+                <div class="lang-row"><strong>Español:</strong> <span id="outSpanish"></span></div>
+            </div>
+        </section>
+
+        <section id="tab-notas" class="app-tab" style="display: none;">
+            <h2>Mis Apuntes y Carpetas</h2>
+            <div class="folder-controls">
+                <input type="text" id="newFolderInput" placeholder="Nueva carpeta (ej. Restaurante)">
+                <button id="createFolderBtn" class="btn-secondary">Crear</button>
+            </div>
+            <div id="foldersContainer" class="folders-grid">
+                </div>
+            
+            <hr>
+            
+            <div class="note-controls">
+                <select id="folderSelect"><option value="General">General</option></select>
+                <textarea id="newNoteInput" placeholder="Escribe tu nota aquí..."></textarea>
+                <button id="saveNoteBtn" class="btn-primary">Guardar Nota</button>
+            </div>
+            <div id="notesContainer" class="notes-list">
+                </div>
+        </section>
+
+        <section id="tab-perfil" class="app-tab" style="display: none;">
+            
+            <div class="settings-card highlight-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin:0;">⚡ Créditos: <span id="creditCount">20</span></h3>
+                    <a href="https://paypal.me/TU_LINK" target="_blank" class="btn-cafe">☕ Invítame un café</a>
+                </div>
+                <p style="font-size: 12px; margin-bottom: 5px;">Añade tus propias APIs para uso ilimitado:</p>
+                <input type="password" id="geminiKey" placeholder="Gemini API Key" class="settings-input">
+                <input type="password" id="groqKey" placeholder="Groq API Key" class="settings-input">
+                <button id="saveKeysBtn" class="btn-primary" style="margin-top: 10px;">Guardar APIs</button>
+            </div>
+
+            <div class="settings-card">
+                <h3>Opciones de Aprendizaje</h3>
+                
+                <div class="setting-row">
+                    <label>1. Sistema de Lectura:</label>
+                    <select id="romanizationSelect">
+                        <option value="jyutping">Jyutping (Estándar)</option>
+                        <option value="yale">Yale</option>
+                    </select>
+                </div>
+
+                <div class="setting-row">
+                    <label>2. Velocidad de Audio TTS:</label>
+                    <input type="range" id="ttsSpeed" min="0.5" max="1.5" step="0.1" value="1">
+                    <span id="speedValue">1.0x</span>
+                </div>
+
+                <div class="setting-row">
+                    <label>3. Meta Diaria de Frases:</label>
+                    <input type="number" id="dailyGoal" value="10" style="width: 60px;">
+                    <span style="font-size: 12px;">Progreso: <span id="goalProgress">0</span></span>
+                </div>
+
+                <hr style="margin: 15px 0; border: 0; border-top: 1px solid #ccc;">
+                
+                <div class="setting-row" style="flex-direction: column; align-items: flex-start;">
+                    <label>4. Gestión de Datos (Backup):</label>
+                    <div style="display: flex; gap: 10px; width: 100%; margin-top: 10px;">
+                        <button id="exportDataBtn" class="btn-secondary">Exportar JSON</button>
+                        <button id="importDataBtn" class="btn-secondary">Importar JSON</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-card">
+                <h3>5. Mis Enlaces Rápidos (Dashboard)</h3>
+                <div class="link-controls">
+                    <input type="text" id="linkName" placeholder="Nombre (ej. Mi Web)">
+                    <input type="url" id="linkUrl" placeholder="https://...">
+                    <button id="addLinkBtn" class="btn-secondary">Añadir Botón</button>
+                </div>
+                <div id="customLinksContainer" class="links-grid" style="margin-top: 15px;">
+                    </div>
+            </div>
+
+            <div class="settings-card">
+                <div class="history-header">
+                    <h3>Historial de Búsquedas</h3>
+                    <button id="clearHistoryBtn" class="btn-danger">Borrar</button>
+                </div>
+                <ul id="historyList"></ul>
             </div>
             
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="password" id="geminiKey" placeholder="Tu API Key de Gemini..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-                <input type="password" id="groqKey" placeholder="Tu API Key de Groq..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-            </div>
-            <button id="saveKeysBtn" class="btn-primary" style="background: #34C759;">Guardar Configuración</button>
-        </section>
-        <section class="input-section">
-            <textarea id="userInput" placeholder="Escribe en español, inglés, o jyutping..."></textarea>
-            <div class="api-selector">
-                <label><input type="radio" name="api" value="gemini" checked> Gemini</label>
-                <label><input type="radio" name="api" value="groq"> Groq</label>
-            </div>
-            <button id="translateBtn" class="btn-primary">Traducir con IA</button>
-        </section>
-
-        <section class="visual-map-section" id="visualMapArea">
-            </section>
-
-        <section class="output-section" id="outputArea">
-            <div class="lang-row"><strong>Cantonés:</strong> <span id="outCantonese"></span></div>
-            <div class="lang-row"><strong>Mandarín:</strong> <span id="outMandarin"></span></div>
-            <div class="lang-row"><strong>Inglés:</strong> <span id="outEnglish"></span></div>
-            <div class="lang-row"><strong>Español:</strong> <span id="outSpanish"></span></div>
-        </section>
-
-        <section class="history-section">
-            <div class="history-header">
-                <h2>Progreso Guardado</h2>
-                <button id="clearHistoryBtn" class="btn-danger">Borrar Todo</button>
-            </div>
-            <ul id="historyList"></ul>
+            <button id="adminBtn" class="btn-secondary" style="width:100%; margin-top: 20px;">Acceso Administrador JSON</button>
         </section>
     </main>
 
