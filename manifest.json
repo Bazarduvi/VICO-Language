@@ -1,21 +1,28 @@
 {
   "name": "VICO LENGUA",
   "short_name": "VCLengua",
-  "description": "Diccionario y traductor avanzado de Cantonés con IA y mapeo visual.",
-  "start_url": "/index.html",
+  "description": "Traductor avanzado de Cantonés con IA, flashcards y modo cyberpunk.",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#f4f4f9",
-  "theme_color": "#007AFF",
+  "orientation": "portrait",
+  "background_color": "#0a0a0f",
+  "theme_color": "#00f5ff",
   "icons": [
     {
       "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["education", "utilities"],
+  "lang": "es",
+  "dir": "ltr"
 }
