@@ -401,14 +401,197 @@ async function fetchTranslation(text, api) {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${apiKey}`,
-                'Content-Type': 'application/json'
-            },
+                'Autho// --- 1. CONFIGURACIÓN DEL PROMPT DEL SISTEMA ---
+const SYSTEM_PROMPT = `
+M1- Actúa como un traductor de cantonés al estilo de la aplicación Cantonese Jyutping AI de la Apple store.
+M2- Cuando te llegue mi prompt, da la respuesta lo más preciso posible: haz traducciones en este orden por línea de palabras: cantonés, mandarín, inglés y español.
+M3- Haz las transcripciones precisas y bien estructuradas.
+M4- Proporciona transcripciones en Jyutping para más de 20,000 caracteres chinos igual que la app.
+M5- El objetivo es simular la experiencia de uso de la app proporcionando respuestas precisas por encima de Google Translate.
+M6- Recordatorio: si me das definiciones o información, asegúrate de darme también la traducción del texto en jyutping.
+M7- Basa tus respuestas en el diccionario jyutdictionary.com o cantoneseclass101.com.
+INSTRUCCIÓN VISUAL: Al final de tu respuesta, si la frase tiene más de una palabra, genera un objeto JSON puro (sin formato markdown) que relacione cada palabra en español/inglés con su carácter exacto en cantonés para poder dibujar flechas direccionales en la UI.
+`;
+
+// --- 2. NAVEGACIÓN (PESTAÑAS) Y MODO OSCURO ---
+function switchTab(tabId) {
+    // Ocultar todas las pestañas
+    document.querySelectorAll('.app-tab').forEach(tab => tab.style.display = 'none');
+    // Quitar la clase active de los botones
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    // Mostrar la pestaña seleccionada
+    document.getElementById(`tab-${tabId}`).style.display = 'block';
+    // Activar el botón correspondiente
+    document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+}
+
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('click', () => {
+    const isDark = document.body.dataset.theme === 'dark';
+    document.body.dataset.theme = isDark ? '' : 'dark';
+    themeToggle.innerText = isDark ? '🌙' : '☀️';
+});
+
+// --- 3. GESTIÓN DE HISTORIAL (TRADUCCIONES) ---
+const historyList = document.getElementById('historyList');
+
+function loadHistory() {
+    const history = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+    historyList.innerHTML = '';
+    history.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <strong>${item.query}</strong> ➔ ${item.result} 
+            <button onclick="deleteHistory(${index})" class="btn-danger" style="float:right; padding:5px; margin-left:10px;">X</button>
+        `;
+        historyList.appendChild(li);
+    });
+}
+
+function saveToHistory(query, result) {
+    const history = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+    history.push({ query, result });
+    localStorage.setItem('jyutpingHistory', JSON.stringify(history));
+    loadHistory();
+}
+
+window.deleteHistory = function(index) {
+    const history = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+    history.splice(index, 1);
+    localStorage.setItem('jyutpingHistory', JSON.stringify(history));
+    loadHistory();
+};
+
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+    if(confirm("¿Borrar todo el historial?")) {
+        localStorage.removeItem('jyutpingHistory');
+        loadHistory();
+    }
+});
+
+// --- 4. GESTIÓN DE NOTAS Y CARPETAS ---
+let folders = JSON.parse(localStorage.getItem('jyutFolders')) || ['General'];
+let notes = JSON.parse(localStorage.getItem('jyutNotes')) || [];
+
+function renderFolders() {
+    const container = document.getElementById('foldersContainer');
+    const select = document.getElementById('folderSelect');
+    container.innerHTML = ''; select.innerHTML = '';
+    
+    folders.forEach(folder => {
+        container.innerHTML += `<div class="folder-item">📁 ${folder}</div>`;
+        select.innerHTML += `<option value="${folder}">${folder}</option>`;
+    });
+}
+
+function renderNotes() {
+    const container = document.getElementById('notesContainer');
+    container.innerHTML = '';
+    notes.forEach((note, index) => {
+        container.innerHTML += `
+            <div class="note-item">
+                <div style="font-size: 11px; color: var(--primary); font-weight: bold; margin-bottom: 5px;">📁 ${note.folder}</div>
+                <div>${note.content}</div>
+                <button onclick="deleteNote(${index})" class="btn-danger" style="margin-top: 8px;">Borrar</button>
+            </div>
+        `;
+    });
+}
+
+document.getElementById('createFolderBtn').addEventListener('click', () => {
+    const name = document.getElementById('newFolderInput').value.trim();
+    if(name && !folders.includes(name)) {
+        folders.push(name);
+        localStorage.setItem('jyutFolders', JSON.stringify(folders));
+        renderFolders();
+        document.getElementById('newFolderInput').value = '';
+    }
+});
+
+document.getElementById('saveNoteBtn').addEventListener('click', () => {
+    const folder = document.getElementById('folderSelect').value;
+    const content = document.getElementById('newNoteInput').value.trim();
+    if(content) {
+        notes.push({ folder, content });
+        localStorage.setItem('jyutNotes', JSON.stringify(notes));
+        renderNotes();
+        document.getElementById('newNoteInput').value = '';
+    }
+});
+
+window.deleteNote = function(index) {
+    notes.splice(index, 1);
+    localStorage.setItem('jyutNotes', JSON.stringify(notes));
+    renderNotes();
+};
+
+// --- 5. SISTEMA DE CRÉDITOS Y API KEYS ---
+let userCredits = parseInt(localStorage.getItem('jyutpingCredits'));
+if (isNaN(userCredits)) userCredits = 20;
+document.getElementById('creditCount').innerText = userCredits;
+
+const geminiInput = document.getElementById('geminiKey');
+const groqInput = document.getElementById('groqKey');
+
+geminiInput.value = localStorage.getItem('geminiApiKey') || '';
+groqInput.value = localStorage.getItem('groqApiKey') || '';
+
+document.getElementById('saveKeysBtn').addEventListener('click', () => {
+    localStorage.setItem('geminiApiKey', geminiInput.value.trim());
+    localStorage.setItem('groqApiKey', groqInput.value.trim());
+    alert("¡Claves guardadas localmente!");
+});
+
+function deductCredit() {
+    if (userCredits <= 0) {
+        alert("¡Te has quedado sin créditos! Añade tu propia API Key en Perfil.");
+        return false;
+    }
+    userCredits--;
+    localStorage.setItem('jyutpingCredits', userCredits);
+    document.getElementById('creditCount').innerText = userCredits;
+    return true;
+}
+
+// --- 6. TRADUCCIÓN CON IA (Multi-API) ---
+const translateBtn = document.getElementById('translateBtn');
+const userInput = document.getElementById('userInput');
+let lines = [];
+
+async function fetchTranslation(text, api) {
+    const finalPrompt = `${SYSTEM_PROMPT}\n\nTexto a traducir: "${text}"\n\nDevuelve ÚNICAMENTE un objeto JSON con: "cantonese", "jyutping", "mandarin", "english", "spanish". No uses markdown.`;
+
+    if (api === 'gemini') {
+        const apiKey = localStorage.getItem('geminiApiKey');
+        if (!apiKey) throw new Error("Falta la API Key de Gemini en el Perfil");
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                model: "llama-3.3-70b-versatile", // Puedes cambiar el modelo de Groq aquí
+                contents: [{ parts: [{ text: finalPrompt }] }],
+                generationConfig: { response_mime_type: "application/json" }
+            })
+        });
+        
+        const data = await response.json();
+        if (data.error) throw new Error(data.error.message);
+        return JSON.parse(data.candidates[0].content.parts[0].text);
+    } 
+    else if (api === 'groq') {
+        const apiKey = localStorage.getItem('groqApiKey');
+        if (!apiKey) throw new Error("Falta la API Key de Groq en el Perfil");
+
+        const url = `https://api.groq.com/openai/v1/chat/completions`;
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: "llama-3.3-70b-versatile",
                 messages: [
                     { role: "system", content: SYSTEM_PROMPT },
-                    { role: "user", content: `Traduce y formatea esto en JSON estricto: ${text}` }
+                    { role: "user", content: `Traduce y formatea en JSON: ${text}` }
                 ],
                 response_format: { type: "json_object" }
             })
@@ -420,38 +603,29 @@ async function fetchTranslation(text, api) {
     }
 }
 
-// --- 5. ACTUALIZACIÓN DEL BOTÓN DE TRADUCCIÓN ---
-// (Reemplaza también el event listener del botón translateBtn)
 translateBtn.addEventListener('click', async () => {
     const text = userInput.value.trim();
     if (!text) return alert("Escribe algo para traducir");
-
-    // Verificar y descontar créditos antes de llamar a la IA
     if (!deductCredit()) return;
 
     const selectedApi = document.querySelector('input[name="api"]:checked').value;
-    lines.forEach(line => line.remove());
-    lines = [];
-
+    
     try {
         translateBtn.innerText = "Pensando... 🤔";
         translateBtn.disabled = true;
 
         const response = await fetchTranslation(text, selectedApi);
         
-        // Inyectar en el DOM
-        document.getElementById('outCantonese').innerHTML = `<span id="target-0" class="jyut-t5">${response.cantonese} (${response.jyutping})</span>`;
+        document.getElementById('outCantonese').innerHTML = `<span class="jyut-t5">${response.cantonese} (${response.jyutping})</span>`;
         document.getElementById('outMandarin').innerText = response.mandarin;
         document.getElementById('outEnglish').innerText = response.english;
-        document.getElementById('outSpanish').innerHTML = `<span id="source-0">${response.spanish}</span>`;
+        document.getElementById('outSpanish').innerText = response.spanish;
 
-        // Generar historial
         saveToHistory(text, response.cantonese);
 
     } catch (error) {
-        console.error("Error en API:", error);
-        alert("Error de conexión: " + error.message + "\n¿Pusiste bien tu API Key?");
-        // Devolver el crédito si falla
+        console.error("Error:", error);
+        alert(error.message);
         userCredits++;
         localStorage.setItem('jyutpingCredits', userCredits);
         document.getElementById('creditCount').innerText = userCredits;
@@ -460,7 +634,11 @@ translateBtn.addEventListener('click', async () => {
         translateBtn.disabled = false;
     }
 });
+
+// Inicializar vistas
 loadHistory();
+renderFolders();
+renderNotes();
     </script>
 </body>
 </html>
