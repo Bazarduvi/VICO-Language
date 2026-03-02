@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jyutping AI Dictionary - OS Duvi</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/leader-line-new@1.1.9/leader-line.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Jyutping AI 🇭🇰</h1>
+        <button id="adminBtn" class="btn-secondary">⚙️ Admin / JSON</button>
+    </header>
+
+    <main>
+        <section class="input-section">
+            <textarea id="userInput" placeholder="Escribe en español, inglés, o jyutping..."></textarea>
+            <div class="api-selector">
+                <label><input type="radio" name="api" value="gemini" checked> Gemini</label>
+                <label><input type="radio" name="api" value="groq"> Groq</label>
+            </div>
+            <button id="translateBtn" class="btn-primary">Traducir con IA</button>
+        </section>
+
+        <section class="visual-map-section" id="visualMapArea">
+            </section>
+
+        <section class="output-section" id="outputArea">
+            <div class="lang-row"><strong>Cantonés:</strong> <span id="outCantonese"></span></div>
+            <div class="lang-row"><strong>Mandarín:</strong> <span id="outMandarin"></span></div>
+            <div class="lang-row"><strong>Inglés:</strong> <span id="outEnglish"></span></div>
+            <div class="lang-row"><strong>Español:</strong> <span id="outSpanish"></span></div>
+        </section>
+
+        <section class="history-section">
+            <div class="history-header">
+                <h2>Progreso Guardado</h2>
+                <button id="clearHistoryBtn" class="btn-danger">Borrar Todo</button>
+            </div>
+            <ul id="historyList"></ul>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
