@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="cyber">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>VICO Lengua</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   VICO LENGUA — CYBERPUNK PWA
+   ============================================================ */
+
+:root {
+  /* Cyberpunk palette */
+  --cyber-bg:       #0a0a0f;
+  --cyber-surface:  #0f0f1a;
+  --cyber-card:     #13131f;
+  --cyber-border:   #1e1e3a;
+  --cyber-cyan:     #00f5ff;
+  --cyber-pink:     #ff006e;
+  --cyber-yellow:   #ffd60a;
+  --cyber-purple:   #7b2fff;
+  --cyber-green:    #39ff14;
+  --cyber-text:     #e0e0ff;
+  --cyber-muted:    #6060a0;
+  --glow-cyan:      0 0 10px #00f5ff80, 0 0 30px #00f5ff30;
+  --glow-pink:      0 0 10px #ff006e80, 0 0 30px #ff006e30;
+  --glow-yellow:    0 0 10px #ffd60a80, 0 0 30px #ffd60a30;
+  /* Tone colors */
+  --t1: #FF3B30; --t2: #FF9500; --t3: #FFCC00;
+  --t4: #4CD964; --t5: #00f5ff; --t6: #7b2fff;
+  /* Layout */
+  --nav-h: 60px;
+  --top-bar-h: 50px;
+  --header-h: 56px;
+}
+
+[data-theme="light"] {
+  --cyber-bg:      #f0f0f5;
+  --cyber-surface: #e8e8f0;
+  --cyber-card:    #ffffff;
+  --cyber-border:  #ccccdd;
+  --cyber-cyan:    #0066cc;
+  --cyber-pink:    #cc0055;
+  --cyber-yellow:  #cc9900;
+  --cyber-purple:  #6600cc;
+  --cyber-green:   #007700;
+  --cyber-text:    #1a1a2e;
+  --cyber-muted:   #888899;
+  --glow-cyan:     0 0 5px #0066cc40;
+  --glow-pink:     0 0 5px #cc005540;
+  --glow-yellow:   0 0 5px #cc990040;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Exo 2', sans-serif;
+  background: var(--cyber-bg);
+  color: var(--cyber-text);
+  overflow-x: hidden;
+}
+
+/* Scanline effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,245,255,0.015) 2px,
+    rgba(0,245,255,0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+[data-theme="light"] body::before { display: none; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--cyber-bg); }
+::-webkit-scrollbar-thumb { background: var(--cyber-cyan); border-radius: 2px; }
+
+/* ── TOP BAR (Pomodoro + ChatBot) ── */
+#topBar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: var(--top-bar-h);
+  background: var(--cyber-surface);
+  border-bottom: 1px solid var(--cyber-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  z-index: 900;
+  gap: 8px;
+}
+
+#pomodoroWidget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+#pomoClock {
+  font-size: 20px;
+  color: var(--cyber-cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 2px;
+  min-width: 56px;
+}
+
+#pomoStatus {
+  font-size: 10px;
+  color: var(--cyber-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.top-icon-btn {
+  background: none;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-muted);
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.top-icon-btn:hover, .top-icon-btn.active {
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+#themeToggle {
+  background: none;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-muted);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+#themeToggle:hover {
+  border-color: var(--cyber-yellow);
+  color: var(--cyber-yellow);
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed;
+  top: var(--top-bar-h);
+  left: 0;
+  width: 100%;
+  height: var(--header-h);
+  background: var(--cyber-surface);
+  border-bottom: 2px solid var(--cyber-pink);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  z-index: 800;
+  gap: 10px;
+}
+
+header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 16px;
+  font-weight: 900;
+  background: linear-gradient(90deg, var(--cyber-cyan), var(--cyber-pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+  flex: 1;
+}
+
+#creditDisplay {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--cyber-yellow);
+  border: 1px solid var(--cyber-yellow);
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-shadow: var(--glow-yellow);
+  white-space: nowrap;
+}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0;
+  width: 100%;
+  height: var(--nav-h);
+  background: var(--cyber-surface);
+  border-top: 2px solid var(--cyber-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 900;
+}
+
+.nav-btn {
+  background: none;
+  border: none;
+  color: var(--cyber-muted);
+  font-family: 'Exo 2', sans-serif;
+  font-size: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  width: 20%;
+}
+.nav-btn span.nav-icon { font-size: 20px; }
+.nav-btn.active {
+  color: var(--cyber-cyan);
+  text-shadow: var(--glow-cyan);
+}
+.nav-btn.active span.nav-icon { filter: drop-shadow(0 0 6px var(--cyber-cyan)); }
+
+/* ── MAIN CONTENT ── */
+main {
+  padding-top: calc(var(--top-bar-h) + var(--header-h) + 16px);
+  padding-bottom: calc(var(--nav-h) + 16px);
+  padding-left: 14px;
+  padding-right: 14px;
+  max-width: 700px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.app-tab { display: none; }
+.app-tab.active-tab { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── CARDS ── */
+.cyber-card {
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.cyber-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--cyber-cyan), var(--cyber-purple));
+}
+.cyber-card.accent-pink::before { background: linear-gradient(180deg, var(--cyber-pink), var(--cyber-yellow)); }
+.cyber-card.accent-yellow::before { background: linear-gradient(180deg, var(--cyber-yellow), var(--cyber-green)); }
+
+.card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--cyber-cyan);
+  margin-bottom: 12px;
+}
+
+/* ── INPUTS ── */
+.cyber-input {
+  width: 100%;
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  color: var(--cyber-text);
+  padding: 10px 12px;
+  font-family: 'Exo 2', sans-serif;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.cyber-input:focus {
+  border-color: var(--cyber-cyan);
+  box-shadow: 0 0 0 2px rgba(0,245,255,0.15);
+}
+textarea.cyber-input { resize: vertical; min-height: 80px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 11px 18px;
+  border: none;
+  border-radius: 6px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  letter-spacing: 1px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(90deg, var(--cyber-cyan), var(--cyber-purple));
+  color: #000;
+  width: 100%;
+}
+.btn-primary:hover { filter: brightness(1.2); box-shadow: var(--glow-cyan); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-muted);
+  font-size: 11px;
+  padding: 8px 12px;
+}
+.btn-secondary:hover { border-color: var(--cyber-cyan); color: var(--cyber-cyan); }
+.btn-danger {
+  background: transparent;
+  border: 1px solid var(--cyber-pink);
+  color: var(--cyber-pink);
+  font-size: 10px;
+  padding: 5px 10px;
+}
+.btn-danger:hover { background: var(--cyber-pink); color: #000; }
+.btn-sm { padding: 6px 10px; font-size: 10px; }
+
+/* ── API SELECTOR ── */
+.api-selector {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+.api-chip {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  background: var(--cyber-bg);
+  color: var(--cyber-muted);
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.api-chip.selected {
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  background: rgba(0,245,255,0.08);
+}
+
+/* ── TRANSLATION OUTPUT ── */
+.translation-grid {
+  display: grid;
+  gap: 10px;
+}
+.lang-row {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.lang-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 10px;
+  color: var(--cyber-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  min-width: 70px;
+  padding-top: 2px;
+}
+.lang-value {
+  font-size: 17px;
+  flex: 1;
+  line-height: 1.5;
+}
+.lang-speak {
+  background: none;
+  border: none;
+  color: var(--cyber-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  transition: color 0.2s;
+}
+.lang-speak:hover { color: var(--cyber-cyan); }
+.jyut-t1 { color: var(--t1); font-weight: 600; }
+.jyut-t2 { color: var(--t2); font-weight: 600; }
+.jyut-t3 { color: var(--t3); font-weight: 600; }
+.jyut-t4 { color: var(--t4); font-weight: 600; }
+.jyut-t5 { color: var(--t5); font-weight: 600; }
+.jyut-t6 { color: var(--t6); font-weight: 600; }
+
+/* ── VISUAL MAP ── */
+#visualMapArea {
+  min-height: 80px;
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  position: relative;
+}
+.map-word {
+  background: rgba(0,245,255,0.1);
+  border: 1px solid var(--cyber-cyan);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  color: var(--cyber-cyan);
+}
+
+/* ── FLASHCARDS ── */
+.flashcard-container {
+  perspective: 1000px;
+  height: 200px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.flashcard {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+.flashcard.flipped { transform: rotateY(180deg); }
+.flashcard-front, .flashcard-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+.flashcard-front {
+  background: linear-gradient(135deg, var(--cyber-card), var(--cyber-surface));
+  border: 2px solid var(--cyber-cyan);
+  box-shadow: var(--glow-cyan);
+}
+.flashcard-back {
+  background: linear-gradient(135deg, var(--cyber-card), var(--cyber-surface));
+  border: 2px solid var(--cyber-pink);
+  box-shadow: var(--glow-pink);
+  transform: rotateY(180deg);
+}
+.fc-main { font-size: 32px; margin-bottom: 8px; }
+.fc-sub { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--cyber-muted); }
+.fc-hint { font-size: 10px; color: var(--cyber-muted); margin-top: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.flashcard-controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+.fc-progress {
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--cyber-muted);
+  margin-bottom: 8px;
+}
+
+/* ── POMODORO PANEL ── */
+#pomodoroPanel {
+  display: none;
+  position: fixed;
+  top: calc(var(--top-bar-h) + var(--header-h));
+  right: 0;
+  width: 300px;
+  background: var(--cyber-surface);
+  border-left: 2px solid var(--cyber-cyan);
+  border-bottom: 2px solid var(--cyber-cyan);
+  border-bottom-left-radius: 12px;
+  padding: 16px;
+  z-index: 750;
+  box-shadow: -4px 4px 20px rgba(0,245,255,0.2);
+}
+#pomodoroPanel.open { display: block; animation: slideLeft 0.3s ease; }
+@keyframes slideLeft { from { transform: translateX(100%); opacity:0; } to { transform: translateX(0); opacity:1; } }
+
+.pomo-display {
+  text-align: center;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 52px;
+  color: var(--cyber-cyan);
+  text-shadow: var(--glow-cyan);
+  letter-spacing: 4px;
+  margin: 12px 0;
+}
+.pomo-phase {
+  text-align: center;
+  font-family: 'Orbitron', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--cyber-pink);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.pomo-controls { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+.pomo-settings { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.pomo-setting label { font-size: 10px; color: var(--cyber-muted); display: block; margin-bottom: 3px; }
+.pomo-setting input {
+  width: 100%;
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 4px;
+  color: var(--cyber-text);
+  padding: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+}
+.pomo-history { max-height: 120px; overflow-y: auto; }
+.pomo-history-item {
+  font-size: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  color: var(--cyber-muted);
+  padding: 3px 0;
+  border-bottom: 1px solid var(--cyber-border);
+}
+
+/* ── CHAT BOT ── */
+#chatPanel {
+  display: none;
+  position: fixed;
+  bottom: calc(var(--nav-h) + 8px);
+  right: 0;
+  width: min(340px, 100vw);
+  height: 480px;
+  background: var(--cyber-surface);
+  border: 2px solid var(--cyber-purple);
+  border-bottom-right-radius: 0;
+  border-radius: 12px 0 0 12px;
+  z-index: 750;
+  display: none;
+  flex-direction: column;
+  box-shadow: -4px 0 20px rgba(123,47,255,0.3);
+}
+#chatPanel.open { display: flex; animation: slideLeft 0.3s ease; }
+
+#chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.chat-msg {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.chat-msg.user {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--cyber-purple), var(--cyber-cyan));
+  color: #000;
+}
+.chat-msg.bot {
+  align-self: flex-start;
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-text);
+}
+.chat-msg.bot.loading { opacity: 0.7; }
+
+.chat-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--cyber-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.chat-header-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  color: var(--cyber-purple);
+  letter-spacing: 2px;
+}
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 10px;
+  border-top: 1px solid var(--cyber-border);
+}
+.chat-input-row input {
+  flex: 1;
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  color: var(--cyber-text);
+  padding: 8px;
+  font-size: 13px;
+  outline: none;
+}
+.chat-input-row input:focus { border-color: var(--cyber-purple); }
+.chat-send {
+  background: var(--cyber-purple);
+  border: none;
+  color: white;
+  width: 36px; height: 36px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* ── DASHBOARD / RSS ── */
+.rss-section-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--cyber-pink);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rss-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyber-pink), transparent);
+}
+.rss-item {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  text-decoration: none;
+  display: block;
+}
+.rss-item:hover { border-color: var(--cyber-cyan); }
+.rss-item-title { font-size: 13px; color: var(--cyber-text); line-height: 1.4; margin-bottom: 4px; }
+.rss-item-meta { font-size: 10px; color: var(--cyber-muted); font-family: 'Share Tech Mono', monospace; }
+.rss-loading { text-align: center; color: var(--cyber-muted); font-size: 12px; padding: 20px; font-family: 'Share Tech Mono', monospace; }
+
+/* ── NOTES ── */
+.folders-grid {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+.folder-chip {
+  background: transparent;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-muted);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.folder-chip.active, .folder-chip:hover {
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  background: rgba(0,245,255,0.08);
+}
+.note-item {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  position: relative;
+}
+.note-folder-tag {
+  font-size: 10px;
+  color: var(--cyber-purple);
+  font-family: 'Share Tech Mono', monospace;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+.note-content { font-size: 14px; line-height: 1.5; }
+.note-date { font-size: 10px; color: var(--cyber-muted); margin-top: 6px; font-family: 'Share Tech Mono', monospace; }
+
+/* ── PROFILE / SETTINGS ── */
+.setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cyber-border);
+  gap: 10px;
+}
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size: 13px; color: var(--cyber-text); }
+.setting-sub { font-size: 10px; color: var(--cyber-muted); margin-top: 2px; }
+select.cyber-input {
+  width: auto;
+  padding: 6px 10px;
+  font-size: 13px;
+  height: 34px;
+  min-width: 120px;
+}
+
+/* ── CUSTOM LINKS ── */
+.links-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.custom-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.2s, transform 0.1s;
+  position: relative;
+  overflow: hidden;
+  word-break: break-word;
+  gap: 6px;
+}
+.custom-link-btn:hover { filter: brightness(1.2); transform: scale(1.02); }
+.custom-link-btn .link-edit-btns {
+  position: absolute;
+  top: 4px; right: 4px;
+  display: none;
+  gap: 4px;
+}
+.custom-link-btn:hover .link-edit-btns { display: flex; }
+
+/* Link shapes */
+.shape-rect    { border-radius: 6px; }
+.shape-pill    { border-radius: 30px; }
+.shape-hex     { clip-path: polygon(10% 0%, 90% 0%, 100% 50%, 90% 100%, 10% 100%, 0% 50%); }
+.shape-diamond { transform: skewX(-10deg); }
+.shape-cyber   { border-radius: 2px; clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)); }
+
+/* ── LINK CREATOR FORM ── */
+.link-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.link-color-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.link-color-swatch {
+  width: 30px; height: 30px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.link-color-swatch:hover, .link-color-swatch.selected { border-color: white; transform: scale(1.15); }
+.shape-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.shape-preview {
+  width: 40px; height: 30px;
+  background: var(--cyber-card);
+  border: 2px solid var(--cyber-border);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+  color: var(--cyber-muted);
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+.shape-preview.selected { border-color: var(--cyber-cyan); color: var(--cyber-cyan); }
+
+/* ── HISTORY ── */
+#historyList { list-style: none; padding: 0; }
+#historyList li {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── PDF UPLOAD ── */
+.upload-zone {
+  border: 2px dashed var(--cyber-border);
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  color: var(--cyber-muted);
+  font-size: 13px;
+}
+.upload-zone:hover { border-color: var(--cyber-cyan); color: var(--cyber-cyan); }
+.upload-zone .upload-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+
+/* ── QUIZ MINI GAME ── */
+.quiz-option {
+  width: 100%;
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--cyber-text);
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  font-family: 'Exo 2', sans-serif;
+}
+.quiz-option:hover { border-color: var(--cyber-cyan); }
+.quiz-option.correct { border-color: var(--cyber-green); background: rgba(57,255,20,0.1); color: var(--cyber-green); }
+.quiz-option.wrong { border-color: var(--cyber-pink); background: rgba(255,0,110,0.1); }
+
+/* ── JSON IMPORT FOR VOCAB ── */
+.vocab-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+.vocab-card {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.vocab-card:hover { border-color: var(--cyber-cyan); }
+.vocab-main { font-size: 22px; margin-bottom: 4px; }
+.vocab-jyut { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--cyber-cyan); }
+.vocab-trans { font-size: 11px; color: var(--cyber-muted); margin-top: 2px; }
+
+/* ── TOAST NOTIFICATION ── */
+#toast {
+  position: fixed;
+  bottom: calc(var(--nav-h) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--cyber-card);
+  border: 1px solid var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'Share Tech Mono', monospace;
+  z-index: 9998;
+  transition: transform 0.3s;
+  box-shadow: var(--glow-cyan);
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ── TABS WITHIN CARDS (sub-navigation) ── */
+.sub-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--cyber-border);
+  padding-bottom: 10px;
+  overflow-x: auto;
+}
+.sub-tab {
+  background: none;
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.sub-tab.active {
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  background: rgba(0,245,255,0.08);
+}
+
+/* ── RESPONSIVENESS ── */
+@media (max-width: 400px) {
+  header h1 { font-size: 13px; }
+  .flashcard .fc-main { font-size: 26px; }
+}
+
+/* ── DIAGRAM AREA ── */
+#diagramArea {
+  background: var(--cyber-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: 8px;
+  padding: 14px;
+  min-height: 200px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  color: var(--cyber-cyan);
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+/* Cafe btn */
+.btn-cafe {
+  background: linear-gradient(90deg, var(--cyber-yellow), #ff9500);
+  color: #000;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Segmented lang direction */
+.direction-toggle {
+  display: flex;
+  background: var(--cyber-bg);
+  border-radius: 8px;
+  padding: 3px;
+  border: 1px solid var(--cyber-border);
+  gap: 3px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+.direction-btn {
+  flex: 1;
+  padding: 7px;
+  border: none;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--cyber-muted);
+  font-family: 'Share Tech Mono', monospace;
+  text-align: center;
+  transition: all 0.2s;
+}
+.direction-btn.active {
+  background: var(--cyber-cyan);
+  color: #000;
+  font-weight: 700;
+}
+
+/* Progress bar pomodoro */
+#pomoProgress {
+  width: 100%;
+  height: 3px;
+  background: var(--cyber-border);
+  border-radius: 2px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+#pomoProgressFill {
+  height: 100%;
+  background: var(--cyber-cyan);
+  border-radius: 2px;
+  transition: width 1s linear;
+  box-shadow: 0 0 8px var(--cyber-cyan);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     TOP BAR — Pomodoro + Chat + Theme
+═══════════════════════════════════════════ -->
+<div id="topBar">
+  <div id="pomodoroWidget">
+    <button class="top-icon-btn" id="btnPomoToggle" title="Pomodoro">⏱</button>
+    <div>
+      <div id="pomoClock">25:00</div>
+      <div id="pomoStatus">LISTO</div>
+    </div>
+  </div>
+  <div style="display:flex; align-items:center; gap:8px; flex:1; justify-content:flex-end;">
+    <button class="top-icon-btn" id="btnPomoStart">▶</button>
+    <button class="top-icon-btn" id="btnPomoReset">↺</button>
+    <button class="top-icon-btn" id="btnChatToggle" title="ChatBot">🤖 Chat</button>
+    <button id="themeToggle" title="Cambiar modo">🌙</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════ -->
+<header>
+  <h1>🇪🇸 VICO 🇭🇰 LENGUA</h1>
+  <div id="creditDisplay">⚡ <span id="creditCount">20</span> créditos</div>
+</header>
+
+<!-- ═══════════════════════════════════════════
+     POMODORO PANEL
+═══════════════════════════════════════════ -->
+<div id="pomodoroPanel">
+  <div style="font-family:'Orbitron',sans-serif; font-size:11px; color:var(--cyber-cyan); letter-spacing:2px; margin-bottom:10px;">⏱ POMODORO</div>
+  <div id="pomoProgress"><div id="pomoProgressFill" style="width:100%"></div></div>
+  <div class="pomo-display" id="pomoDisplay">25:00</div>
+  <div class="pomo-phase" id="pomoPhase">● ENFOQUE</div>
+  <div class="pomo-controls">
+    <button class="btn btn-secondary btn-sm" id="pomoStart2">▶ Iniciar</button>
+    <button class="btn btn-secondary btn-sm" id="pomoReset2">↺ Reset</button>
+    <button class="btn btn-secondary btn-sm" id="pomoSkip">⏭ Saltar</button>
+  </div>
+  <div class="pomo-settings">
+    <div class="pomo-setting">
+      <label>Enfoque (min)</label>
+      <input type="number" id="pomoFocusMin" value="25" min="1" max="60">
+    </div>
+    <div class="pomo-setting">
+      <label>Descanso (min)</label>
+      <input type="number" id="pomoBreakMin" value="5" min="1" max="30">
+    </div>
+  </div>
+  <div style="font-size:10px; color:var(--cyber-muted); margin-bottom:6px; font-family:'Share Tech Mono',monospace;">HISTORIAL</div>
+  <div class="pomo-history" id="pomoHistory"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     CHATBOT PANEL
+═══════════════════════════════════════════ -->
+<div id="chatPanel">
+  <div class="chat-header">
+    <span class="chat-header-title">🤖 SENSEI BOT</span>
+    <small style="font-size:10px; color:var(--cyber-muted);">Solo idiomas</small>
+    <button onclick="toggleChat()" style="background:none;border:none;color:var(--cyber-muted);cursor:pointer;font-size:18px;">×</button>
+  </div>
+  <div id="chatMessages">
+    <div class="chat-msg bot">¡Hola! Soy Sensei Bot 🤖 Puedo ayudarte con idiomas, cultura cantonesa, gramática, historia y vocabulario. ¿Por dónde empezamos?</div>
+  </div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Pregunta sobre idiomas..." autocomplete="off">
+    <button class="chat-send" onclick="sendChatMessage()">➤</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     BOTTOM NAV
+═══════════════════════════════════════════ -->
+<nav class="bottom-nav">
+  <button onclick="switchTab('dashboard')" class="nav-btn active" id="nav-dashboard">
+    <span class="nav-icon">🏠</span>
+    <span>Inicio</span>
+  </button>
+  <button onclick="switchTab('traductor')" class="nav-btn" id="nav-traductor">
+    <span class="nav-icon">🔤</span>
+    <span>Traducir</span>
+  </button>
+  <button onclick="switchTab('cards')" class="nav-btn" id="nav-cards">
+    <span class="nav-icon">🃏</span>
+    <span>Cards</span>
+  </button>
+  <button onclick="switchTab('notas')" class="nav-btn" id="nav-notas">
+    <span class="nav-icon">📝</span>
+    <span>Notas</span>
+  </button>
+  <button onclick="switchTab('perfil')" class="nav-btn" id="nav-perfil">
+    <span class="nav-icon">⚙️</span>
+    <span>Perfil</span>
+  </button>
+</nav>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════ -->
+<main>
+
+<!-- ───────────────── DASHBOARD ───────────────── -->
+<section id="tab-dashboard" class="app-tab active-tab">
+
+  <!-- My Links -->
+  <div class="cyber-card accent-yellow">
+    <div class="card-title">🔗 MIS ENLACES RÁPIDOS</div>
+    <div id="customLinksContainer" class="links-grid"></div>
+    <div id="noLinksMsg" style="text-align:center; color:var(--cyber-muted); font-size:12px; padding:10px;">
+      Añade enlaces en ⚙️ Perfil
+    </div>
+  </div>
+
+  <!-- World Trends RSS -->
+  <div class="cyber-card">
+    <div class="rss-section-title">🌐 TENDENCIAS MUNDIALES</div>
+    <div id="rssWorld"><div class="rss-loading">📡 Cargando noticias...</div></div>
+  </div>
+
+  <!-- AI & Languages RSS -->
+  <div class="cyber-card accent-pink">
+    <div class="rss-section-title">🤖 IA &amp; IDIOMAS</div>
+    <div id="rssAI"><div class="rss-loading">📡 Cargando feeds...</div></div>
+  </div>
+
+</section>
+
+<!-- ───────────────── TRADUCTOR ───────────────── -->
+<section id="tab-traductor" class="app-tab">
+
+  <!-- Direction selector -->
+  <div class="direction-toggle">
+    <button class="direction-btn active" data-dir="to-cant">🇪🇸→🇭🇰 Al Cantonés</button>
+    <button class="direction-btn" data-dir="to-esp">🇭🇰→🇪🇸 Al Español</button>
+    <button class="direction-btn" data-dir="to-eng">🇭🇰→🇬🇧 Al Inglés</button>
+    <button class="direction-btn" data-dir="to-man">🇭🇰→🇨🇳 Al Mandarín</button>
+  </div>
+
+  <div class="cyber-card">
+    <textarea id="userInput" class="cyber-input" placeholder="Escribe en español, inglés, cantonés o jyutping..."></textarea>
+    <div class="api-selector">
+      <div class="api-chip selected" data-api="gemini">⚡ Gemini</div>
+      <div class="api-chip" data-api="groq">🦙 Groq</div>
+    </div>
+    <button id="translateBtn" class="btn btn-primary">⚡ TRADUCIR CON IA</button>
+  </div>
+
+  <div id="visualMapArea"></div>
+
+  <div class="cyber-card" id="outputCard" style="display:none;">
+    <div class="translation-grid">
+      <div class="lang-row">
+        <span class="lang-label">粵語</span>
+        <span class="lang-value" id="outCantonese"></span>
+        <button class="lang-speak" onclick="speak('cantonese')" title="Escuchar">🔊</button>
+      </div>
+      <div class="lang-row">
+        <span class="lang-label">普通話</span>
+        <span class="lang-value" id="outMandarin"></span>
+        <button class="lang-speak" onclick="speak('mandarin')" title="Escuchar">🔊</button>
+      </div>
+      <div class="lang-row">
+        <span class="lang-label">English</span>
+        <span class="lang-value" id="outEnglish"></span>
+        <button class="lang-speak" onclick="speak('english')" title="Escuchar">🔊</button>
+      </div>
+      <div class="lang-row">
+        <span class="lang-label">Español</span>
+        <span class="lang-value" id="outSpanish"></span>
+        <button class="lang-speak" onclick="speak('spanish')" title="Escuchar">🔊</button>
+      </div>
+    </div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="btn btn-secondary btn-sm" onclick="saveCurrentToFlashcard()">💾 Guardar como tarjeta</button>
+      <button class="btn btn-secondary btn-sm" onclick="saveCurrentToNote()">📝 Guardar nota</button>
+    </div>
+  </div>
+
+</section>
+
+<!-- ───────────────── FLASHCARDS ───────────────── -->
+<section id="tab-cards" class="app-tab">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="switchSubTab('cards','fc-study')">🎴 Estudiar</button>
+    <button class="sub-tab" onclick="switchSubTab('cards','fc-vocab')">📖 Vocabulario</button>
+    <button class="sub-tab" onclick="switchSubTab('cards','fc-quiz')">🎯 Quiz</button>
+    <button class="sub-tab" onclick="switchSubTab('cards','fc-pdf')">📄 PDF</button>
+  </div>
+
+  <!-- STUDY MODE -->
+  <div id="fc-study" class="sub-panel">
+    <div class="fc-progress" id="fcProgress">Tarjeta 1 de 1</div>
+    <div class="flashcard-container" onclick="flipCard()">
+      <div class="flashcard" id="flashcard">
+        <div class="flashcard-front">
+          <div class="fc-main" id="fcFront">你好</div>
+          <div class="fc-sub" id="fcFrontSub">nei5 hou3</div>
+          <div class="fc-hint">Toca para ver</div>
+        </div>
+        <div class="flashcard-back">
+          <div class="fc-main" id="fcBack">Hola</div>
+          <div class="fc-sub" id="fcBackSub">Hello · 你好 (nǐ hǎo)</div>
+        </div>
+      </div>
+    </div>
+    <div class="flashcard-controls">
+      <button class="btn btn-danger" onclick="rateCard('bad')">✗ Difícil</button>
+      <button class="btn btn-secondary" onclick="rateCard('ok')">~ Bien</button>
+      <button class="btn btn-secondary" style="border-color:var(--cyber-green);color:var(--cyber-green);" onclick="rateCard('good')">✓ Fácil</button>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="prevCard()">← Anterior</button>
+      <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="nextCard()">Siguiente →</button>
+    </div>
+    <!-- Direction toggle for cards -->
+    <div style="margin-top:10px;">
+      <select id="cardLangSelect" class="cyber-input" style="font-size:12px; height:34px;">
+        <option value="cant-es">粵語 → Español</option>
+        <option value="es-cant">Español → 粵語</option>
+        <option value="cant-en">粵語 → English</option>
+        <option value="en-cant">English → 粵語</option>
+        <option value="cant-man">粵語 → 普通話</option>
+        <option value="man-cant">普通話 → 粵語</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- VOCABULARY BROWSER -->
+  <div id="fc-vocab" class="sub-panel" style="display:none;">
+    <div class="cyber-card">
+      <div class="card-title">📥 IMPORTAR VOCABULARIO JSON</div>
+      <p style="font-size:12px; color:var(--cyber-muted); margin-bottom:10px;">Formato: <code style="font-family:'Share Tech Mono',monospace;">[{"cant":"你好","jyut":"nei5 hou3","es":"Hola","en":"Hello","man":"你好"}]</code></p>
+      <input type="file" id="vocabJsonFile" accept=".json" style="display:none;" onchange="loadVocabJSON(event)">
+      <button class="btn btn-secondary" onclick="document.getElementById('vocabJsonFile').click()">📂 Cargar JSON</button>
+    </div>
+    <div id="vocabGrid" class="vocab-grid" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="fc-quiz" class="sub-panel" style="display:none;">
+    <div class="cyber-card">
+      <div id="quizArea">
+        <div style="text-align:center; padding:20px; color:var(--cyber-muted);">
+          <p style="font-size:32px; margin-bottom:10px;">🎯</p>
+          <p style="font-size:13px;">Necesitas tarjetas para jugar al quiz.</p>
+          <button class="btn btn-primary" style="margin-top:14px;" onclick="startQuiz()">▶ Iniciar Quiz</button>
+        </div>
+      </div>
+    </div>
+    <div class="cyber-card" id="quizStatsCard" style="display:none;">
+      <div class="card-title">📊 ESTADÍSTICAS</div>
+      <div id="quizStats"></div>
+    </div>
+  </div>
+
+  <!-- PDF READER -->
+  <div id="fc-pdf" class="sub-panel" style="display:none;">
+    <div class="cyber-card">
+      <div class="card-title">📄 LECTOR PDF DE IDIOMAS</div>
+      <div class="upload-zone" id="pdfDropZone" onclick="document.getElementById('pdfFileInput').click()">
+        <span class="upload-icon">📄</span>
+        Arrastra o toca para subir un PDF sobre idiomas
+      </div>
+      <input type="file" id="pdfFileInput" accept=".pdf" style="display:none;" onchange="handlePDFUpload(event)">
+    </div>
+    <div id="pdfOptions" style="display:none;">
+      <div class="cyber-card">
+        <div class="card-title">¿QUÉ HACER CON EL PDF?</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="btn btn-secondary" onclick="pdfAction('summary')">📋 Resumir contenido</button>
+          <button class="btn btn-secondary" onclick="pdfAction('quiz')">🎯 Convertir en Quiz</button>
+          <button class="btn btn-secondary" onclick="pdfAction('flashcards')">🃏 Generar Tarjetas</button>
+          <button class="btn btn-secondary" onclick="pdfAction('diagram')">🗺️ Crear Diagrama</button>
+        </div>
+      </div>
+    </div>
+    <div id="pdfResult" style="display:none;">
+      <div class="cyber-card">
+        <div class="card-title">📊 RESULTADO</div>
+        <div id="pdfResultContent" id="diagramArea"></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ───────────────── NOTAS ───────────────── -->
+<section id="tab-notas" class="app-tab">
+  <div class="cyber-card">
+    <div class="card-title">📁 CARPETAS</div>
+    <div class="folders-grid" id="foldersContainer"></div>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <input type="text" id="newFolderInput" class="cyber-input" placeholder="Nueva carpeta..." style="height:36px; font-size:13px;">
+      <button class="btn btn-secondary btn-sm" id="createFolderBtn">+ Crear</button>
+    </div>
+  </div>
+
+  <div class="cyber-card">
+    <div class="card-title">✏️ NUEVA NOTA</div>
+    <select id="folderSelect" class="cyber-input" style="margin-bottom:10px; height:36px; font-size:13px;"></select>
+    <textarea id="newNoteInput" class="cyber-input" placeholder="Escribe tu nota aquí..." style="height:100px;"></textarea>
+    <button id="saveNoteBtn" class="btn btn-primary" style="margin-top:10px;">💾 GUARDAR NOTA</button>
+  </div>
+
+  <div id="notesContainer"></div>
+</section>
+
+<!-- ───────────────── PERFIL ───────────────── -->
+<section id="tab-perfil" class="app-tab">
+
+  <!-- API & Credits -->
+  <div class="cyber-card accent-yellow">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <div>
+        <div class="card-title" style="margin-bottom:2px;">⚡ CRÉDITOS</div>
+        <div style="font-family:'Share Tech Mono',monospace; font-size:24px; color:var(--cyber-yellow);" id="creditCount2">20</div>
+      </div>
+      <a href="https://paypal.me/TU_LINK" target="_blank" class="btn-cafe">☕ Café</a>
+    </div>
+    <input type="password" id="geminiKey" class="cyber-input" placeholder="Gemini API Key" style="margin-bottom:8px;">
+    <input type="password" id="groqKey" class="cyber-input" placeholder="Groq API Key" style="margin-bottom:10px;">
+    <button id="saveKeysBtn" class="btn btn-primary">💾 GUARDAR CLAVES</button>
+  </div>
+
+  <!-- Learning Options -->
+  <div class="cyber-card">
+    <div class="card-title">🎓 OPCIONES DE APRENDIZAJE</div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Sistema de Lectura</div>
+        <div class="setting-sub">Romanización cantonesa</div>
+      </div>
+      <select id="romanizationSelect" class="cyber-input">
+        <option value="jyutping">Jyutping</option>
+        <option value="yale">Yale</option>
+      </select>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Velocidad TTS</div>
+        <div class="setting-sub">Velocidad del audio</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <input type="range" id="ttsSpeed" min="0.5" max="1.5" step="0.1" value="1" style="width:80px;">
+        <span id="speedValue" style="font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--cyber-cyan); min-width:32px;">1.0x</span>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Meta Diaria</div>
+        <div class="setting-sub">Progreso: <span id="goalProgress">0</span> frases</div>
+      </div>
+      <input type="number" id="dailyGoal" value="10" class="cyber-input" style="width:60px; height:34px; font-size:14px; text-align:center;">
+    </div>
+    <div class="setting-row">
+      <div>
+        <div class="setting-label">Backup de Datos</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button id="exportDataBtn" class="btn btn-secondary btn-sm">⬆ Export</button>
+        <button id="importDataBtn" class="btn btn-secondary btn-sm">⬇ Import</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom Links Creator -->
+  <div class="cyber-card accent-pink">
+    <div class="card-title">🔗 CREAR ENLACE RÁPIDO</div>
+    <div class="link-form">
+      <input type="text" id="linkName" class="cyber-input" placeholder="Título del botón">
+      <input type="url" id="linkUrl" class="cyber-input" placeholder="https://...">
+
+      <div>
+        <div style="font-size:11px; color:var(--cyber-muted); margin-bottom:6px;">FORMA DEL BOTÓN</div>
+        <div class="shape-options">
+          <div class="shape-preview selected" data-shape="shape-rect" onclick="selectShape(this)">▬</div>
+          <div class="shape-preview" data-shape="shape-pill" onclick="selectShape(this)">⬭</div>
+          <div class="shape-preview" data-shape="shape-hex" onclick="selectShape(this)">⬡</div>
+          <div class="shape-preview" data-shape="shape-diamond" onclick="selectShape(this)">/▬/</div>
+          <div class="shape-preview" data-shape="shape-cyber" onclick="selectShape(this)">⌐</div>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:11px; color:var(--cyber-muted); margin-bottom:6px;">COLOR</div>
+        <div class="link-color-options">
+          <div class="link-color-swatch selected" style="background:linear-gradient(135deg,#00f5ff,#7b2fff);" data-color="linear-gradient(135deg,#00f5ff,#7b2fff)" onclick="selectColor(this)"></div>
+          <div class="link-color-swatch" style="background:linear-gradient(135deg,#ff006e,#ffd60a);" data-color="linear-gradient(135deg,#ff006e,#ffd60a)" onclick="selectColor(this)"></div>
+          <div class="link-color-swatch" style="background:linear-gradient(135deg,#39ff14,#00f5ff);" data-color="linear-gradient(135deg,#39ff14,#00f5ff)" onclick="selectColor(this)"></div>
+          <div class="link-color-swatch" style="background:#7b2fff;" data-color="#7b2fff" onclick="selectColor(this)"></div>
+          <div class="link-color-swatch" style="background:#ffd60a;" data-color="#ffd60a" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+
+      <button id="addLinkBtn" class="btn btn-primary">+ AÑADIR BOTÓN</button>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="cyber-card">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div class="card-title" style="margin-bottom:0;">📜 HISTORIAL</div>
+      <button id="clearHistoryBtn" class="btn btn-danger btn-sm">Borrar</button>
+    </div>
+    <ul id="historyList"></ul>
+  </div>
+
+  <!-- Admin JSON -->
+  <button id="adminBtn" class="btn btn-secondary" style="width:100%; margin-top:4px;">🔧 Acceso Admin JSON</button>
+
+</section>
+
+</main>
+
+<!-- ═══════════════════════════════════════════
+     TOAST
+═══════════════════════════════════════════ -->
+<div id="toast"></div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ═══════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════
+const SYSTEM_PROMPT = `
+Eres un experto en lingüística cantonesa y profesor de idiomas multilingüe de Hong Kong.
+M1- Traduce con la precisión de la app "Cantonese Jyutping AI" de la App Store.
+M2- Responde SIEMPRE en JSON puro con las claves: cantonese, jyutping, mandarin, english, spanish, mapping.
+M3- Jyutping preciso con tonos numéricos (1-6). Usa jyutdictionary.com y cantoneseclass101.com como referencia.
+M4- "mapping" es un array de objetos {source, target} para relacionar palabras origen-destino.
+M5- No incluyas markdown, solo JSON válido.
+`;
+
+const CHAT_SYSTEM = `
+Eres Sensei Bot, un asistente especializado EXCLUSIVAMENTE en:
+- Aprendizaje de idiomas (cantonés, mandarín, español, inglés)
+- Gramática, fonética, pronunciación cantonesa
+- Historia y cultura de los idiomas
+- Técnicas de memorización de idiomas
+- Buscar y explicar expresiones idiomáticas
+- Generar diagramas de gramática o vocabulario en texto ASCII/Unicode
+
+RESTRICCIONES ABSOLUTAS — NUNCA RESPONDS A:
+- Contenido adulto, sexual o violento
+- Política, religión o temas controvertidos
+- Hacking, seguridad informática
+- Información personal o privada
+- Cualquier tema fuera del aprendizaje de idiomas
+
+Si alguien pregunta algo fuera de idiomas, responde: "⚠️ Solo puedo ayudarte con aprendizaje de idiomas. ¿Tienes alguna duda sobre cantonés, español, inglés o mandarín?"
+`;
+
+// Default flashcard deck
+const DEFAULT_DECK = [
+  {cant:"你好", jyut:"nei5 hou3", es:"Hola", en:"Hello", man:"你好 nǐ hǎo"},
+  {cant:"多謝", jyut:"do1 ze6", es:"Gracias", en:"Thank you", man:"谢谢 xièxiè"},
+  {cant:"唔該", jyut:"m4 goi1", es:"Por favor / Perdón", en:"Excuse me", man:"麻烦了"},
+  {cant:"再見", jyut:"zoi3 gin3", es:"Adiós", en:"Goodbye", man:"再见"},
+  {cant:"係", jyut:"hai6", es:"Sí", en:"Yes", man:"是"},
+  {cant:"唔係", jyut:"m4 hai6", es:"No", en:"No", man:"不是"},
+  {cant:"我愛你", jyut:"ngo5 oi3 nei5", es:"Te quiero", en:"I love you", man:"我爱你"},
+  {cant:"幾多錢", jyut:"gei2 do1 cin2", es:"¿Cuánto cuesta?", en:"How much?", man:"多少钱"},
+  {cant:"廁所喺邊", jyut:"ci3 so2 hai2 bin1", es:"¿Dónde está el baño?", en:"Where's the bathroom?", man:"洗手间在哪"},
+  {cant:"飲茶", jyut:"jam2 caa4", es:"Tomar el té / Dim Sum", en:"Yum cha / Dim sum", man:"喝茶"}
+];
+
+let state = {
+  currentCardIndex: 0,
+  cardFlipped: false,
+  deck: JSON.parse(localStorage.getItem('vicoDeck')) || DEFAULT_DECK,
+  selectedApi: 'gemini',
+  selectedShape: 'shape-rect',
+  selectedColor: 'linear-gradient(135deg,#00f5ff,#7b2fff)',
+  lastTranslation: null,
+  quizActive: false,
+  quizScore: { correct: 0, wrong: 0, total: 0 },
+  chatHistory: [],
+  pomoRunning: false,
+  pomoPhase: 'focus',
+  pomoSeconds: 25 * 60,
+  pomoInterval: null,
+  pomoSessions: JSON.parse(localStorage.getItem('vicoPomoHistory')) || [],
+  pdfContent: null,
+  activeCardDir: 'cant-es'
+};
+
+// ═══════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function $(id) { return document.getElementById(id); }
+
+function pad(n) { return String(n).padStart(2, '0'); }
+
+function fmtDate(d) {
+  return new Date(d).toLocaleString('es-ES', {day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function switchTab(tabId) {
+  document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active-tab'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  $(`tab-${tabId}`).classList.add('active-tab');
+  $(`nav-${tabId}`).classList.add('active');
+
+  if (tabId === 'dashboard') renderDashboard();
+  if (tabId === 'notas') { renderFolders(); renderNotes(); }
+  if (tabId === 'cards') renderCurrentCard();
+  if (tabId === 'perfil') { renderHistoryList(); renderCustomLinks(); }
+}
+
+function switchSubTab(parent, subId) {
+  const parentEl = $(`tab-${parent}`);
+  parentEl.querySelectorAll('.sub-panel').forEach(p => p.style.display = 'none');
+  parentEl.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+  $(subId).style.display = 'block';
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════
+const themeBtn = $('themeToggle');
+themeBtn.addEventListener('click', () => {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  document.documentElement.setAttribute('data-theme', isLight ? 'cyber' : 'light');
+  themeBtn.textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('vicoTheme', isLight ? 'cyber' : 'light');
+});
+// Restore theme
+(function() {
+  const saved = localStorage.getItem('vicoTheme') || 'cyber';
+  document.documentElement.setAttribute('data-theme', saved);
+  themeBtn.textContent = saved === 'light' ? '☀️' : '🌙';
+})();
+
+// ═══════════════════════════════════════════
+// CREDITS & API KEYS
+// ═══════════════════════════════════════════
+let userCredits = parseInt(localStorage.getItem('jyutpingCredits'));
+if (isNaN(userCredits)) userCredits = 20;
+function updateCreditDisplay() {
+  $('creditCount').textContent = userCredits;
+  $('creditCount2').textContent = userCredits;
+}
+updateCreditDisplay();
+
+// Load saved keys
+$('geminiKey').value = localStorage.getItem('geminiApiKey') || '';
+$('groqKey').value = localStorage.getItem('groqApiKey') || '';
+
+$('saveKeysBtn').addEventListener('click', () => {
+  localStorage.setItem('geminiApiKey', $('geminiKey').value.trim());
+  localStorage.setItem('groqApiKey', $('groqKey').value.trim());
+  showToast('✅ Claves guardadas');
+});
+
+function deductCredit() {
+  const geminiKey = localStorage.getItem('geminiApiKey');
+  const groqKey = localStorage.getItem('groqApiKey');
+  if (geminiKey || groqKey) return true; // Own key = unlimited
+  if (userCredits <= 0) {
+    showToast('⚠️ Sin créditos. Añade tu API Key en Perfil.');
+    return false;
+  }
+  userCredits--;
+  localStorage.setItem('jyutpingCredits', userCredits);
+  updateCreditDisplay();
+  return true;
+}
+
+// ═══════════════════════════════════════════
+// API SELECTOR
+// ═══════════════════════════════════════════
+document.querySelectorAll('.api-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('.api-chip').forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    state.selectedApi = this.dataset.api;
+  });
+});
+
+// ═══════════════════════════════════════════
+// TRANSLATION API CALLS
+// ═══════════════════════════════════════════
+async function callGemini(prompt, systemPrompt = SYSTEM_PROMPT) {
+  const apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) throw new Error('Falta la API Key de Gemini en Perfil');
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: systemPrompt + '\n\n' + prompt }] }],
+    generationConfig: { response_mime_type: 'application/json' }
+  };
+  const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  const text = d.candidates[0].content.parts[0].text;
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+}
+
+async function callGeminiRaw(prompt, systemPrompt) {
+  const apiKey = localStorage.getItem('geminiApiKey');
+  if (!apiKey) throw new Error('Falta la API Key de Gemini en Perfil');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  const body = {
+    contents: [{ parts: [{ text: (systemPrompt || '') + '\n\n' + prompt }] }]
+  };
+  const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  return d.candidates[0].content.parts[0].text;
+}
+
+async function callGroq(userMsg, systemPrompt = SYSTEM_PROMPT, json = true) {
+  const apiKey = localStorage.getItem('groqApiKey');
+  if (!apiKey) throw new Error('Falta la API Key de Groq en Perfil');
+  const body = {
+    model: 'llama-3.3-70b-versatile',
+    messages: [
+      { role:'system', content: systemPrompt },
+      { role:'user', content: userMsg }
+    ]
+  };
+  if (json) body.response_format = { type:'json_object' };
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method:'POST',
+    headers:{ 'Authorization': `Bearer ${apiKey}`, 'Content-Type':'application/json' },
+    body: JSON.stringify(body)
+  });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error.message);
+  const text = d.choices[0].message.content;
+  return json ? JSON.parse(text.replace(/```json|```/g, '').trim()) : text;
+}
+
+async function fetchTranslation(text) {
+  const prompt = `Traduce/analiza: "${text}"\nDevuelve ÚNICAMENTE JSON con: cantonese, jyutping, mandarin, english, spanish, mapping (array de {source, target}).`;
+  if (state.selectedApi === 'gemini') return await callGemini(prompt);
+  else return await callGroq(prompt);
+}
+
+// ═══════════════════════════════════════════
+// TRANSLATE BUTTON
+// ═══════════════════════════════════════════
+$('translateBtn').addEventListener('click', async () => {
+  const text = $('userInput').value.trim();
+  if (!text) { showToast('⚠️ Escribe algo para traducir'); return; }
+  if (!deductCredit()) return;
+
+  const btn = $('translateBtn');
+  btn.textContent = '⚡ PROCESANDO...';
+  btn.disabled = true;
+
+  try {
+    const res = await fetchTranslation(text);
+    state.lastTranslation = res;
+
+    $('outCantonese').innerHTML = colorizeJyutping(res.cantonese, res.jyutping);
+    $('outMandarin').textContent = res.mandarin || '—';
+    $('outEnglish').textContent = res.english || '—';
+    $('outSpanish').textContent = res.spanish || '—';
+    $('outputCard').style.display = 'block';
+
+    // Visual map
+    renderVisualMap(res.mapping);
+
+    // Save to history
+    saveToHistory(text, res.cantonese);
+    $('goalProgress').textContent = parseInt($('goalProgress').textContent || 0) + 1;
+
+  } catch(err) {
+    showToast('❌ Error: ' + err.message);
+    userCredits++;
+    localStorage.setItem('jyutpingCredits', userCredits);
+    updateCreditDisplay();
+  } finally {
+    btn.textContent = '⚡ TRADUCIR CON IA';
+    btn.disabled = false;
+  }
+});
+
+function colorizeJyutping(chars, jyut) {
+  if (!jyut) return chars || '—';
+  const toneColors = ['','jyut-t1','jyut-t2','jyut-t3','jyut-t4','jyut-t5','jyut-t6'];
+  const syllables = jyut.split(' ');
+  const colored = syllables.map(s => {
+    const tone = parseInt(s.slice(-1));
+    const cls = toneColors[tone] || '';
+    return cls ? `<span class="${cls}">${s}</span>` : s;
+  }).join(' ');
+  return `<span style="font-size:22px;">${chars}</span> <br><span style="font-family:'Share Tech Mono',monospace; font-size:13px;">${colored}</span>`;
+}
+
+function renderVisualMap(mapping) {
+  const area = $('visualMapArea');
+  area.innerHTML = '';
+  if (!mapping || !mapping.length) return;
+  mapping.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'map-word';
+    div.textContent = `${m.source} → ${m.target}`;
+    area.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════
+// SPEAK TTS
+// ═══════════════════════════════════════════
+const LANG_CODES = { cantonese:'zh-HK', mandarin:'zh-CN', english:'en-US', spanish:'es-ES' };
+function speak(lang) {
+  if (!state.lastTranslation) return;
+  const text = state.lastTranslation[lang];
+  if (!text) return;
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = LANG_CODES[lang];
+  utt.rate = parseFloat($('ttsSpeed').value) || 1;
+  speechSynthesis.speak(utt);
+}
+$('ttsSpeed').addEventListener('input', function() {
+  $('speedValue').textContent = parseFloat(this.value).toFixed(1) + 'x';
+});
+
+// ═══════════════════════════════════════════
+// DIRECTION TOGGLE
+// ═══════════════════════════════════════════
+document.querySelectorAll('.direction-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.direction-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════
+function saveToHistory(query, result) {
+  const history = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+  history.unshift({ query, result, date: Date.now() });
+  if (history.length > 50) history.pop();
+  localStorage.setItem('jyutpingHistory', JSON.stringify(history));
+}
+
+function renderHistoryList() {
+  const history = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+  const list = $('historyList');
+  list.innerHTML = '';
+  if (!history.length) {
+    list.innerHTML = '<li style="color:var(--cyber-muted); font-size:12px;">Sin historial</li>';
+    return;
+  }
+  history.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div style="flex:1;">
+        <span style="color:var(--cyber-cyan);">${item.query}</span>
+        <span style="color:var(--cyber-muted);"> → ${item.result}</span>
+        <div style="font-size:10px; color:var(--cyber-muted); font-family:'Share Tech Mono',monospace;">${fmtDate(item.date)}</div>
+      </div>
+      <button onclick="deleteHistoryItem(${i})" class="btn btn-danger btn-sm">✕</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+window.deleteHistoryItem = function(i) {
+  const h = JSON.parse(localStorage.getItem('jyutpingHistory')) || [];
+  h.splice(i, 1);
+  localStorage.setItem('jyutpingHistory', JSON.stringify(h));
+  renderHistoryList();
+};
+
+$('clearHistoryBtn').addEventListener('click', () => {
+  if (confirm('¿Borrar todo el historial?')) {
+    localStorage.removeItem('jyutpingHistory');
+    renderHistoryList();
+  }
+});
+
+// ═══════════════════════════════════════════
+// NOTES & FOLDERS
+// ═══════════════════════════════════════════
+let folders = JSON.parse(localStorage.getItem('jyutFolders')) || ['General','Restaurante','Viaje'];
+let notes = JSON.parse(localStorage.getItem('jyutNotes')) || [];
+
+function renderFolders() {
+  const container = $('foldersContainer');
+  const sel = $('folderSelect');
+  container.innerHTML = '';
+  sel.innerHTML = '';
+  folders.forEach(f => {
+    container.innerHTML += `<div class="folder-chip" onclick="filterNotes('${f}')">${f}</div>`;
+    sel.innerHTML += `<option value="${f}">${f}</option>`;
+  });
+}
+
+function filterNotes(folder) {
+  document.querySelectorAll('.folder-chip').forEach(c => c.classList.remove('active'));
+  event.target.classList.add('active');
+  renderNotes(folder);
+}
+
+function renderNotes(filterFolder = null) {
+  const container = $('notesContainer');
+  container.innerHTML = '';
+  const filtered = filterFolder ? notes.filter(n => n.folder === filterFolder) : notes;
+  if (!filtered.length) {
+    container.innerHTML = '<div style="text-align:center; color:var(--cyber-muted); font-size:12px; padding:20px;">Sin notas</div>';
+    return;
+  }
+  filtered.forEach((note, i) => {
+    const idx = notes.indexOf(note);
+    container.innerHTML += `
+      <div class="note-item">
+        <div class="note-folder-tag">📁 ${note.folder}</div>
+        <div class="note-content">${note.content}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+          <span class="note-date">${fmtDate(note.date)}</span>
+          <button onclick="deleteNote(${idx})" class="btn btn-danger btn-sm">Borrar</button>
+        </div>
+      </div>
+    `;
+  });
+}
+
+$('createFolderBtn').addEventListener('click', () => {
+  const name = $('newFolderInput').value.trim();
+  if (name && !folders.includes(name)) {
+    folders.push(name);
+    localStorage.setItem('jyutFolders', JSON.stringify(folders));
+    renderFolders();
+    $('newFolderInput').value = '';
+    showToast(`📁 Carpeta "${name}" creada`);
+  }
+});
+
+$('saveNoteBtn').addEventListener('click', () => {
+  const folder = $('folderSelect').value;
+  const content = $('newNoteInput').value.trim();
+  if (content) {
+    notes.push({ folder, content, date: Date.now() });
+    localStorage.setItem('jyutNotes', JSON.stringify(notes));
+    renderNotes();
+    $('newNoteInput').value = '';
+    showToast('📝 Nota guardada');
+  }
+});
+
+window.deleteNote = function(i) {
+  notes.splice(i, 1);
+  localStorage.setItem('jyutNotes', JSON.stringify(notes));
+  renderNotes();
+};
+
+function saveCurrentToNote() {
+  if (!state.lastTranslation) return;
+  const t = state.lastTranslation;
+  notes.push({
+    folder: 'General',
+    content: `${t.cantonese} (${t.jyutping}) | ${t.spanish} | ${t.english}`,
+    date: Date.now()
+  });
+  localStorage.setItem('jyutNotes', JSON.stringify(notes));
+  showToast('📝 Guardado en notas');
+}
+
+function saveCurrentToFlashcard() {
+  if (!state.lastTranslation) return;
+  const t = state.lastTranslation;
+  state.deck.push({ cant: t.cantonese, jyut: t.jyutping, es: t.spanish, en: t.english, man: t.mandarin });
+  localStorage.setItem('vicoDeck', JSON.stringify(state.deck));
+  showToast('🃏 Tarjeta guardada');
+}
+
+// ═══════════════════════════════════════════
+// FLASHCARDS
+// ═══════════════════════════════════════════
+function renderCurrentCard() {
+  const deck = state.deck;
+  if (!deck.length) return;
+  const card = deck[state.currentCardIndex];
+  const dir = $('cardLangSelect').value;
+
+  let frontMain, frontSub, backMain, backSub;
+  switch(dir) {
+    case 'cant-es': frontMain=card.cant; frontSub=card.jyut; backMain=card.es; backSub=`${card.en} · ${card.man}`; break;
+    case 'es-cant': frontMain=card.es; frontSub=''; backMain=card.cant; backSub=card.jyut; break;
+    case 'cant-en': frontMain=card.cant; frontSub=card.jyut; backMain=card.en; backSub=card.man; break;
+    case 'en-cant': frontMain=card.en; frontSub=''; backMain=card.cant; backSub=card.jyut; break;
+    case 'cant-man': frontMain=card.cant; frontSub=card.jyut; backMain=card.man; backSub=''; break;
+    case 'man-cant': frontMain=card.man; frontSub=''; backMain=card.cant; backSub=card.jyut; break;
+  }
+
+  $('fcFront').textContent = frontMain;
+  $('fcFrontSub').textContent = frontSub;
+  $('fcBack').textContent = backMain;
+  $('fcBackSub').textContent = backSub;
+  $('fcProgress').textContent = `Tarjeta ${state.currentCardIndex + 1} de ${deck.length}`;
+  $('flashcard').classList.remove('flipped');
+  state.cardFlipped = false;
+}
+
+function flipCard() {
+  $('flashcard').classList.toggle('flipped');
+  state.cardFlipped = !state.cardFlipped;
+}
+
+function nextCard() {
+  state.currentCardIndex = (state.currentCardIndex + 1) % state.deck.length;
+  renderCurrentCard();
+}
+function prevCard() {
+  state.currentCardIndex = (state.currentCardIndex - 1 + state.deck.length) % state.deck.length;
+  renderCurrentCard();
+}
+
+function rateCard(rating) {
+  nextCard();
+}
+
+$('cardLangSelect').addEventListener('change', renderCurrentCard);
+
+// ═══════════════════════════════════════════
+// VOCAB JSON IMPORT
+// ═══════════════════════════════════════════
+function loadVocabJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        state.deck = [...state.deck, ...data];
+        localStorage.setItem('vicoDeck', JSON.stringify(state.deck));
+        renderVocabGrid();
+        renderCurrentCard();
+        showToast(`✅ ${data.length} entradas importadas`);
+      }
+    } catch(err) { showToast('❌ JSON inválido'); }
+  };
+  reader.readAsText(file);
+}
+
+function renderVocabGrid() {
+  const grid = $('vocabGrid');
+  grid.innerHTML = '';
+  state.deck.forEach((card, i) => {
+    grid.innerHTML += `
+      <div class="vocab-card" onclick="speakCard(${i})">
+        <div class="vocab-main">${card.cant}</div>
+        <div class="vocab-jyut">${card.jyut || ''}</div>
+        <div class="vocab-trans">${card.es || ''}</div>
+        <div class="vocab-trans" style="color:var(--cyber-muted);">${card.en || ''}</div>
+      </div>
+    `;
+  });
+}
+
+window.speakCard = function(i) {
+  const card = state.deck[i];
+  const utt = new SpeechSynthesisUtterance(card.cant);
+  utt.lang = 'zh-HK';
+  speechSynthesis.speak(utt);
+};
+
+// ═══════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════
+function startQuiz() {
+  if (state.deck.length < 4) { showToast('⚠️ Necesitas al menos 4 tarjetas'); return; }
+  state.quizScore = { correct:0, wrong:0, total:0 };
+  nextQuizQuestion();
+}
+
+function nextQuizQuestion() {
+  const deck = state.deck;
+  const idx = Math.floor(Math.random() * deck.length);
+  const correct = deck[idx];
+  const others = deck.filter((_, i) => i !== idx).sort(() => Math.random()-0.5).slice(0,3);
+  const options = [...others, correct].sort(() => Math.random()-0.5);
+
+  const area = $('quizArea');
+  area.innerHTML = `
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:42px; margin-bottom:8px;">${correct.cant}</div>
+      <div style="font-family:'Share Tech Mono',monospace; font-size:14px; color:var(--cyber-cyan);">${correct.jyut}</div>
+    </div>
+    <div style="font-size:11px; color:var(--cyber-muted); text-align:center; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px;">¿Qué significa en español?</div>
+    ${options.map(o => `<button class="quiz-option" onclick="checkAnswer(this, '${o.cant.replace(/'/g,"\\'")}', '${correct.cant.replace(/'/g,"\\'")}', '${correct.es.replace(/'/g,"\\'")}')">${o.es}</button>`).join('')}
+    <div style="text-align:center; font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--cyber-muted); margin-top:10px;">
+      ✅ ${state.quizScore.correct} · ❌ ${state.quizScore.wrong}
+    </div>
+  `;
+  $('quizStatsCard').style.display = 'none';
+}
+
+window.checkAnswer = function(btn, selected, correct, correctEs) {
+  document.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+  state.quizScore.total++;
+  if (selected === correct) {
+    btn.classList.add('correct');
+    state.quizScore.correct++;
+    showToast('✅ ¡Correcto!');
+  } else {
+    btn.classList.add('wrong');
+    state.quizScore.wrong++;
+    // Show correct
+    document.querySelectorAll('.quiz-option').forEach(b => {
+      if (b.textContent === correctEs) b.classList.add('correct');
+    });
+    showToast('❌ Era: ' + correctEs);
+  }
+  setTimeout(nextQuizQuestion, 1800);
+};
+
+// ═══════════════════════════════════════════
+// PDF HANDLER
+// ═══════════════════════════════════════════
+async function handlePDFUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  showToast('📄 PDF cargado: ' + file.name);
+  // Read as text using FileReader (basic extraction)
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    state.pdfContent = `Archivo: ${file.name} (PDF cargado)`; 
+    $('pdfOptions').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function pdfAction(action) {
+  if (!deductCredit()) return;
+  const actionLabels = {
+    summary: 'Resume el contenido de este PDF sobre idiomas en puntos clave.',
+    quiz: 'Crea 5 preguntas de quiz con 4 opciones cada una basadas en este PDF.',
+    flashcards: 'Extrae 10 pares de vocabulario en formato cantonés-español del contenido.',
+    diagram: 'Crea un diagrama ASCII/Unicode del contenido principal.'
+  };
+
+  $('pdfResult').style.display = 'block';
+  $('pdfResultContent').textContent = '⚡ Procesando con IA...';
+
+  try {
+    const prompt = `${actionLabels[action]}\n\nContenido del PDF: ${state.pdfContent || 'Documento sobre el idioma cantonés'}`;
+    let result;
+    if (state.selectedApi === 'gemini') {
+      result = await callGeminiRaw(prompt, 'Eres un experto en idiomas. Responde siempre relacionado con el aprendizaje de idiomas.');
+    } else {
+      result = await callGroq(prompt, 'Eres un experto en idiomas.', false);
+    }
+    $('pdfResultContent').textContent = result;
+  } catch(e) {
+    $('pdfResultContent').textContent = '❌ Error: ' + e.message;
+  }
+}
+
+// ═══════════════════════════════════════════
+// DASHBOARD / RSS
+// ═══════════════════════════════════════════
+async function renderDashboard() {
+  renderCustomLinks();
+  loadRSSFeeds();
+}
+
+async function loadRSSFeeds() {
+  // Use allorigins CORS proxy to fetch RSS
+  const worldFeeds = [
+    'https://feeds.bbci.co.uk/news/world/rss.xml',
+    'https://rss.nytimes.com/services/xml/rss/nyt/World.xml'
+  ];
+  const aiFeeds = [
+    'https://techcrunch.com/feed/',
+    'https://rss.arxiv.org/rss/cs.CL'
+  ];
+
+  await Promise.all([
+    loadFeed($('rssWorld'), worldFeeds, 10),
+    loadFeed($('rssAI'), aiFeeds, 5)
+  ]);
+}
+
+async function loadFeed(container, feeds, maxItems) {
+  container.innerHTML = '<div class="rss-loading">📡 Cargando...</div>';
+  const items = [];
+
+  for (const feedUrl of feeds) {
+    try {
+      const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`;
+      const r = await fetch(proxy);
+      const d = await r.json();
+      const parser = new DOMParser();
+      const xml = parser.parseFromString(d.contents, 'text/xml');
+      const entries = xml.querySelectorAll('item');
+      entries.forEach(entry => {
+        const title = entry.querySelector('title')?.textContent?.trim() || '';
+        const link = entry.querySelector('link')?.textContent?.trim() || '#';
+        const pubDate = entry.querySelector('pubDate')?.textContent || '';
+        if (title) items.push({ title, link, pubDate });
+      });
+    } catch(e) { /* skip failed feed */ }
+  }
+
+  container.innerHTML = '';
+  if (!items.length) {
+    container.innerHTML = '<div class="rss-loading">⚠️ No se pudieron cargar las noticias. Verifica tu conexión.</div>';
+    return;
+  }
+
+  items.slice(0, maxItems).forEach(item => {
+    const a = document.createElement('a');
+    a.href = item.link;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'rss-item';
+    a.innerHTML = `
+      <div class="rss-item-title">${item.title}</div>
+      <div class="rss-item-meta">${item.pubDate ? new Date(item.pubDate).toLocaleDateString('es-ES') : ''}</div>
+    `;
+    container.appendChild(a);
+  });
+}
+
+// ═══════════════════════════════════════════
+// CUSTOM LINKS
+// ═══════════════════════════════════════════
+let selectedShape = 'shape-rect';
+let selectedColor = 'linear-gradient(135deg,#00f5ff,#7b2fff)';
+
+function selectShape(el) {
+  document.querySelectorAll('.shape-preview').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedShape = el.dataset.shape;
+}
+
+function selectColor(el) {
+  document.querySelectorAll('.link-color-swatch').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+
+$('addLinkBtn').addEventListener('click', () => {
+  const name = $('linkName').value.trim();
+  const url = $('linkUrl').value.trim();
+  if (!name || !url) { showToast('⚠️ Rellena el nombre y la URL'); return; }
+  const links = JSON.parse(localStorage.getItem('vicoLinks')) || [];
+  links.push({ name, url, shape: selectedShape, color: selectedColor });
+  localStorage.setItem('vicoLinks', JSON.stringify(links));
+  $('linkName').value = '';
+  $('linkUrl').value = '';
+  renderCustomLinks();
+  showToast('🔗 Enlace añadido');
+});
+
+function renderCustomLinks() {
+  const links = JSON.parse(localStorage.getItem('vicoLinks')) || [];
+  const containers = [$('customLinksContainer')];
+
+  containers.forEach(container => {
+    if (!container) return;
+    container.innerHTML = '';
+    if (!links.length) {
+      $('noLinksMsg') && ($('noLinksMsg').style.display = 'block');
+      return;
+    }
+    $('noLinksMsg') && ($('noLinksMsg').style.display = 'none');
+    links.forEach((link, i) => {
+      const a = document.createElement('a');
+      a.href = link.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = `custom-link-btn ${link.shape || 'shape-rect'}`;
+      a.style.background = link.color || 'var(--cyber-cyan)';
+      // Contrast text color
+      const isLight = link.color && (link.color.includes('ffd60a') || link.color.includes('39ff14'));
+      a.style.color = isLight ? '#000' : '#fff';
+      a.innerHTML = `
+        ${link.name}
+        <div class="link-edit-btns">
+          <button onclick="deleteLink(event,${i})" style="background:rgba(255,0,110,0.8);border:none;color:white;border-radius:3px;padding:2px 5px;font-size:10px;cursor:pointer;">✕</button>
+        </div>
+      `;
+      container.appendChild(a);
+    });
+  });
+}
+
+window.deleteLink = function(e, i) {
+  e.preventDefault(); e.stopPropagation();
+  const links = JSON.parse(localStorage.getItem('vicoLinks')) || [];
+  links.splice(i, 1);
+  localStorage.setItem('vicoLinks', JSON.stringify(links));
+  renderCustomLinks();
+};
+
+// ═══════════════════════════════════════════
+// POMODORO
+// ═══════════════════════════════════════════
+function getFocusSeconds() { return (parseInt($('pomoFocusMin').value) || 25) * 60; }
+function getBreakSeconds() { return (parseInt($('pomoBreakMin').value) || 5) * 60; }
+
+function updatePomoClock() {
+  const m = Math.floor(state.pomoSeconds / 60);
+  const s = state.pomoSeconds % 60;
+  const str = `${pad(m)}:${pad(s)}`;
+  $('pomoClock').textContent = str;
+  $('pomoDisplay').textContent = str;
+
+  const total = state.pomoPhase === 'focus' ? getFocusSeconds() : getBreakSeconds();
+  const pct = (state.pomoSeconds / total) * 100;
+  $('pomoProgressFill').style.width = pct + '%';
+  $('pomoProgressFill').style.background = state.pomoPhase === 'focus' ? 'var(--cyber-cyan)' : 'var(--cyber-green)';
+
+  $('pomoStatus').textContent = state.pomoPhase === 'focus' ? 'ENFOQUE' : 'DESCANSO';
+  $('pomoPhase').textContent = state.pomoPhase === 'focus' ? '● ENFOQUE' : '○ DESCANSO';
+}
+
+function startPomo() {
+  if (state.pomoRunning) return;
+  state.pomoRunning = true;
+  $('btnPomoStart').textContent = '⏸';
+  $('pomoStart2').textContent = '⏸ Pausar';
+
+  state.pomoInterval = setInterval(() => {
+    state.pomoSeconds--;
+    if (state.pomoSeconds <= 0) {
+      clearInterval(state.pomoInterval);
+      state.pomoRunning = false;
+      const completedPhase = state.pomoPhase;
+      const now = new Date().toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit' });
+      state.pomoSessions.unshift(`${now} — ${completedPhase === 'focus' ? '🎯 Enfoque' : '☕ Descanso'} completado`);
+      localStorage.setItem('vicoPomoHistory', JSON.stringify(state.pomoSessions.slice(0, 20)));
+      renderPomoHistory();
+
+      // Switch phase
+      state.pomoPhase = completedPhase === 'focus' ? 'break' : 'focus';
+      state.pomoSeconds = state.pomoPhase === 'focus' ? getFocusSeconds() : getBreakSeconds();
+      updatePomoClock();
+      $('btnPomoStart').textContent = '▶';
+      $('pomoStart2').textContent = '▶ Iniciar';
+      showToast(completedPhase === 'focus' ? '☕ ¡Descanso!' : '🎯 ¡A estudiar!');
+    }
+    updatePomoClock();
+  }, 1000);
+}
+
+function pausePomo() {
+  clearInterval(state.pomoInterval);
+  state.pomoRunning = false;
+  $('btnPomoStart').textContent = '▶';
+  $('pomoStart2').textContent = '▶ Iniciar';
+}
+
+function resetPomo() {
+  pausePomo();
+  state.pomoPhase = 'focus';
+  state.pomoSeconds = getFocusSeconds();
+  updatePomoClock();
+}
+
+function togglePomo() {
+  if (state.pomoRunning) pausePomo();
+  else startPomo();
+}
+
+function renderPomoHistory() {
+  const h = $('pomoHistory');
+  h.innerHTML = state.pomoSessions.slice(0,10).map(s => `<div class="pomo-history-item">${s}</div>`).join('');
+}
+
+$('btnPomoStart').addEventListener('click', togglePomo);
+$('btnPomoReset').addEventListener('click', resetPomo);
+$('pomoStart2').addEventListener('click', togglePomo);
+$('pomoReset2').addEventListener('click', resetPomo);
+$('pomoSkip').addEventListener('click', () => {
+  resetPomo();
+  state.pomoPhase = state.pomoPhase === 'focus' ? 'break' : 'focus';
+  state.pomoSeconds = state.pomoPhase === 'focus' ? getFocusSeconds() : getBreakSeconds();
+  updatePomoClock();
+});
+$('btnPomoToggle').addEventListener('click', () => {
+  $('pomodoroPanel').classList.toggle('open');
+});
+
+updatePomoClock();
+renderPomoHistory();
+
+// ═══════════════════════════════════════════
+// CHATBOT
+// ═══════════════════════════════════════════
+function toggleChat() {
+  $('chatPanel').classList.toggle('open');
+  if ($('chatPanel').classList.contains('open')) {
+    setTimeout(() => $('chatInput').focus(), 300);
+  }
+}
+$('btnChatToggle').addEventListener('click', toggleChat);
+
+$('chatInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendChatMessage();
+  }
+});
+
+async function sendChatMessage() {
+  const input = $('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  if (!deductCredit()) return;
+
+  input.value = '';
+  appendChatMsg(msg, 'user');
+
+  // Check blocked keywords
+  const blocked = ['porn','sex','hack','bomb','weapon','adulto','arma','explosivo','contraseña','password'];
+  if (blocked.some(w => msg.toLowerCase().includes(w))) {
+    appendChatMsg('⚠️ Solo puedo ayudarte con aprendizaje de idiomas.', 'bot');
+    return;
+  }
+
+  const loadingEl = appendChatMsg('...', 'bot loading');
+  state.chatHistory.push({ role:'user', content: msg });
+
+  try {
+    const geminiKey = localStorage.getItem('geminiApiKey');
+    const groqKey = localStorage.getItem('groqApiKey');
+
+    let response;
+    if (!geminiKey && !groqKey) {
+      response = 'Necesitas añadir una API Key en ⚙️ Perfil para usar el chat.';
+    } else if (geminiKey || state.selectedApi === 'gemini') {
+      const historyText = state.chatHistory.slice(-6).map(m => `${m.role}: ${m.content}`).join('\n');
+      response = await callGeminiRaw(
+        `Historial:\n${historyText}\n\nUsuario: ${msg}`,
+        CHAT_SYSTEM
+      );
+    } else {
+      response = await callGroq(msg, CHAT_SYSTEM, false);
+    }
+
+    loadingEl.remove();
+    appendChatMsg(response, 'bot');
+    state.chatHistory.push({ role:'assistant', content: response });
+    if (state.chatHistory.length > 20) state.chatHistory = state.chatHistory.slice(-20);
+
+  } catch(e) {
+    loadingEl.remove();
+    appendChatMsg('❌ Error: ' + e.message, 'bot');
+  }
+}
+
+function appendChatMsg(text, type) {
+  const msgs = $('chatMessages');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${type}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+// ═══════════════════════════════════════════
+// DATA BACKUP
+// ═══════════════════════════════════════════
+$('exportDataBtn').addEventListener('click', () => {
+  const data = {
+    deck: state.deck,
+    notes, folders,
+    history: JSON.parse(localStorage.getItem('jyutpingHistory')) || [],
+    links: JSON.parse(localStorage.getItem('vicoLinks')) || [],
+    pomoHistory: state.pomoSessions
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='vico-backup.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Datos exportados');
+});
+
+$('importDataBtn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type='file'; input.accept='.json';
+  input.onchange = (e) => {
+    const file = e.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (data.deck) { state.deck = data.deck; localStorage.setItem('vicoDeck', JSON.stringify(state.deck)); }
+        if (data.notes) { notes = data.notes; localStorage.setItem('jyutNotes', JSON.stringify(notes)); }
+        if (data.folders) { folders = data.folders; localStorage.setItem('jyutFolders', JSON.stringify(folders)); }
+        if (data.links) localStorage.setItem('vicoLinks', JSON.stringify(data.links));
+        showToast('✅ Datos importados');
+      } catch(err) { showToast('❌ JSON inválido'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+// ═══════════════════════════════════════════
+// ADMIN JSON
+// ═══════════════════════════════════════════
+$('adminBtn').addEventListener('click', () => {
+  const data = {
+    deck: state.deck,
+    links: JSON.parse(localStorage.getItem('vicoLinks')) || []
+  };
+  const win = window.open('', '_blank');
+  win.document.write(`<pre style="background:#000;color:#0f0;padding:20px;font-size:12px;">${JSON.stringify(data, null, 2)}</pre>`);
+});
+
+// ═══════════════════════════════════════════
+// PWA SERVICE WORKER
+// ═══════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+(function init() {
+  renderFolders();
+  renderNotes();
+  renderVocabGrid();
+  renderCustomLinks();
+  renderHistoryList();
+  renderDashboard();
+  renderCurrentCard();
+})();
+
+</script>
+</body>
+</html>
