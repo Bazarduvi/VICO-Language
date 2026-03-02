@@ -118,6 +118,18 @@ button {
     </header>
 
     <main>
+        <section class="duvi-os-panel" style="background: #e5e5ea; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0;">⚡ Modo IA & Créditos: <span id="creditCount">20</span></h3>
+                <a href="https://paypal.me/TU_LINK_PAYPAL" target="_blank" class="btn-secondary" style="text-decoration: none; display: inline-block; background: #FFCC00; color: #333;">☕ Invítame a un café</a>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="password" id="geminiKey" placeholder="Tu API Key de Gemini..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                <input type="password" id="groqKey" placeholder="Tu API Key de Groq..." style="flex: 1; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+            </div>
+            <button id="saveKeysBtn" class="btn-primary" style="background: #34C759;">Guardar Configuración</button>
+        </section>
         <section class="input-section">
             <textarea id="userInput" placeholder="Escribe en español, inglés, o jyutping..."></textarea>
             <div class="api-selector">
